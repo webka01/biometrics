@@ -1,27 +1,24 @@
-
-
 # Biometric Authentication System
 
 ## Table of Contents
 - [1. Introduction](#1-introduction)
 - [2. System Architecture](#2-system-architecture)
 - [3. Face Recognition Module](#3-face-recognition-module)
-- [4. Voice Recognition Module](#4-voice-recognition-module)
-- [5. Performance Evaluation](#5-performance-evaluation)
-- [6. Web Interface Implementation](#6-web-interface-implementation)
-- [7. Security Considerations](#7-security-considerations)
-- [8. Future Improvements](#8-future-improvements)
-- [9. Conclusion](#9-conclusion)
-- [10. References](#10-references)
+- [4. Performance Evaluation](#4-performance-evaluation)
+- [5. Web Interface Implementation](#5-web-interface-implementation)
+- [6. Security Considerations](#6-security-considerations)
+- [7. Future Improvements](#7-future-improvements)
+- [8. Conclusion](#8-conclusion)
+- [9. References](#9-references)
 - [Appendices](#appendices)
 
 ## 1. Introduction
 
 ### 1.1 Project Overview
-This project implements a dual-factor biometric authentication system using face and voice recognition. The system provides a secure way to authenticate users through their unique biological characteristics, offering a more robust alternative to traditional password-based authentication methods.
+This project implements a biometric authentication system using face recognition. The system provides a secure way to authenticate users through their unique facial characteristics, offering a robust alternative to traditional password-based authentication methods.
 
 ### 1.2 Objectives
-- Implement a secure biometric authentication system using face and voice recognition
+- Implement a secure biometric authentication system using face recognition
 - Develop a user-friendly web interface for registration and authentication
 - Ensure high accuracy and reliability in biometric verification
 - Maintain user privacy and data security
@@ -46,7 +43,6 @@ Biometric authentication uses unique biological characteristics to verify identi
 #### Technology Stack
 - **Backend**: Python, Flask
 - **Face Recognition**: OpenCV, face_recognition library
-- **Voice Recognition**: librosa, ffmpeg
 - **Frontend**: HTML, CSS, JavaScript
 - **Storage**: File system for biometric data and user files
 
@@ -60,7 +56,6 @@ graph TB
 
     subgraph Backend
         FR[Face Recognition Module]
-        VR[Voice Recognition Module]
         AM[Authentication Manager]
         FM[File Manager]
     end
@@ -72,12 +67,10 @@ graph TB
 
     UI --> JS
     JS --> FR
-    JS --> VR
     JS --> AM
     JS --> FM
     
     FR --> DB
-    VR --> DB
     AM --> DB
     FM --> DB
     FM --> FS
@@ -94,31 +87,25 @@ graph LR
 
     subgraph Processing
         FP[Face Processing]
-        VP[Voice Processing]
         AP[Authentication Processing]
         FMP[File Management Processing]
     end
 
     subgraph Storage
         FE[Face Encodings]
-        VP2[Voice Patterns]
         UD[User Data]
         FD[File Data]
     end
 
     R --> FP
-    R --> VP
     L --> FP
-    L --> VP
     F --> FMP
 
     FP --> FE
-    VP --> VP2
     AP --> UD
     FMP --> FD
 
     FE --> AP
-    VP2 --> AP
     UD --> AP
     FD --> FMP
 ```
@@ -127,14 +114,12 @@ Data Flow:
 1. **Registration Flow**
    - User provides username
    - Face images captured in different positions
-   - Voice sample recorded and processed
    - Biometric data encoded and stored in database
 
 2. **Authentication Flow**
    - User provides username
    - Face verification performed
-   - Voice verification performed
-   - Two-factor biometric authentication required
+   - Authentication status determined
 
 3. **File Management Flow**
    - Authenticated users can upload/download files
@@ -149,8 +134,7 @@ Data Flow:
 #### User Registration Workflow
 1. Username selection
 2. Face capture from multiple angles
-3. Voice sample recording
-4. Biometric data processing and storage
+3. Biometric data processing and storage
 
 ```python
 @main.route('/register', methods=['GET', 'POST'])
@@ -188,8 +172,7 @@ def register():
 
 #### Authentication Workflow
 1. Face verification
-2. Voice verification
-3. Session creation upon successful authentication
+2. Session creation upon successful authentication
 
 ```python
 @main.route('/login', methods=['GET', 'POST'])
@@ -278,50 +261,9 @@ def capture_face_3d(self) -> List[np.ndarray]:
 - Secure storage of face encodings
 - Liveness detection implementation
 
-## 4. Voice Recognition Module
+## 4. Performance Evaluation
 
-### 4.1 Design and Implementation
-
-#### Audio Processing and Feature Extraction
-The system implements voice recognition using the following approach:
-
-```python
-def _extract_features(self, audio_data: np.ndarray) -> Optional[np.ndarray]:
-    """Extract frequency features from audio data."""
-    try:
-        if len(audio_data) == 0:
-            print("Empty audio data")
-            return None
-
-        # Ensure we have enough samples (at least 1 second)
-        if len(audio_data) < 44100:
-            print(f"Audio too short: {len(audio_data)} samples")
-            return None
-
-        # Process audio features
-        features = audio_data[:44100]
-        features = features / np.max(np.abs(features))
-
-        return features.astype(np.float32)
-    except Exception as e:
-        print(f"Error extracting features: {e}")
-        return None
-```
-
-### 4.2 External Libraries Used
-- librosa: For audio feature extraction
-- ffmpeg: For audio format conversion
-- WebRTC: For browser-based audio capture
-
-### 4.3 Design Choices
-- 44.1kHz sampling rate for high-quality audio capture
-- MFCC feature extraction for voice pattern analysis
-- Secure audio data handling
-- Real-time processing capabilities
-
-## 5. Performance Evaluation
-
-### 5.1 Testing Methodology
+### 4.1 Testing Methodology
 
 #### Dataset Structure
 - **Training Dataset**: 
@@ -336,7 +278,7 @@ def _extract_features(self, audio_data: np.ndarray) -> Optional[np.ndarray]:
 - Dataset randomly split: 80% training, 20% testing
 - Results averaged across folds to ensure robustness
 
-### 5.2 Face Recognition Results
+### 4.2 Face Recognition Results
 
 #### Confusion Matrix Analysis
 ![face_confusion_matrix](https://github.com/user-attachments/assets/43229d70-95bc-472c-afe7-9b2197ae08fa)
@@ -363,21 +305,9 @@ The confusion matrix shows:
 ![face_roc_curve](https://github.com/user-attachments/assets/871e271b-bc1c-441d-bef4-7a829eb38eaf)
 The ROC curve demonstrates the trade-off between true positive rate and false positive rate across different threshold settings. The optimal tolerance value of 0.5 was selected based on the best balance between security (low FAR) and usability (low FRR).
 
-### 5.3 Voice Recognition Results
+## 5. Web Interface Implementation
 
-#### Performance Metrics
-- **Accuracy**: 0.9828
-- **Precision**: 0.0000 (indicates potential need for threshold adjustment)
-- **Recall**: 0.0000 (indicates potential need for threshold adjustment)
-
-#### Visualization Analysis
-![voice_confusion_matrix](https://github.com/user-attachments/assets/252bcab7-3424-4c43-a23d-63c5f17549db)
-![voice_roc_curve](https://github.com/user-attachments/assets/5e3661e9-b737-4d7f-91bf-a490011b2150)
-
-
-## 6. Web Interface Implementation
-
-### 6.1 User Interface Design
+### 5.1 User Interface Design
 
 #### Registration Process
 1. Username Selection:
@@ -386,10 +316,7 @@ The ROC curve demonstrates the trade-off between true positive rate and false po
 2. Face Capture (3 angles)
 <img width="1265" alt="image" src="https://github.com/user-attachments/assets/6bf1b5f5-9bdc-419c-9261-91db81fe8e84" />
 
-3. Voice Sample Recording
-<img width="1262" alt="image" src="https://github.com/user-attachments/assets/dd0d60bb-6d53-40ef-b7e7-efb6ac78995f" />
-
-4. Confirmation
+3. Confirmation
 <img width="1246" alt="image" src="https://github.com/user-attachments/assets/e7d817c4-c5b7-4dc3-9d2e-aeee8357b89e" />
 
 
@@ -398,14 +325,11 @@ The ROC curve demonstrates the trade-off between true positive rate and false po
 1. Face Verification
 <img width="582" alt="image" src="https://github.com/user-attachments/assets/efd4792e-fcb6-473a-bd10-e0999835e1e1" />
 
-2. Voice Verification
-<img width="761" alt="image" src="https://github.com/user-attachments/assets/b7552dc8-b499-4187-bead-e00025338f7f" />
-
-3. Dashboard Access
+2. Dashboard Access
 
 
 
-### 6.2 Dashboard Features
+### 5.2 Dashboard Features
 
 The dashboard provides a comprehensive file management system:
 
@@ -429,7 +353,7 @@ The dashboard provides a comprehensive file management system:
 <img width="1213" alt="image" src="https://github.com/user-attachments/assets/b5d9d38b-b8ea-447b-a6b1-cf6601eac701" />
 
 
-## 7. Security Considerations
+## 6. Security Considerations
 
 ### Data Storage Security
 - Secure storage of biometric templates
@@ -462,19 +386,19 @@ def add_liveness_detection(self, frame: np.ndarray) -> bool:
     return texture_variance > 100 and edge_density > 10
 ```
 
-## 8. Future Improvements
+## 7. Future Improvements
 - Enhanced liveness detection
 - Deep learning-based feature extraction
 - Additional biometric modalities
 
-## 9. Conclusion
+## 8. Conclusion
 This project successfully implements a dual-factor biometric authentication system with the following achievements:
 - Secure and accurate user authentication
 - User-friendly interface
 - Robust performance metrics
 - Scalable architecture
 
-## 10. References
+## 9. References
 1. face_recognition library documentation
 2. OpenCV documentation
 3. Flask documentation
